@@ -3,13 +3,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <locale>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "DATA_TYPE.h"
-#include "SCHEMA.h"
+#include "DATA_TYPE.hpp"
+#include "SCHEMA.hpp"
 
 using byte = std::uint8_t;
 

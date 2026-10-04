@@ -1,0 +1,13 @@
+<identifier> : only alphabets, numbers, and _
+
+DDL:
+    CREATE :- (UC/lc)
+
+        create new db <db_name>
+
+        create new table <table_name>
+
+DML:
+    INSERTION :
+
+        insert in <table_name> values(r1, r2, r3, -------, rn)

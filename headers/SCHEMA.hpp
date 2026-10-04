@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "DATA_TYPE.h"
+#include "DATA_TYPE.hpp"
 
 #define INT_FIELD_SIZE 4
 
