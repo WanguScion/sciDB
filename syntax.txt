@@ -7,6 +7,12 @@ DDL:
 
         create new table <table_name>
 
+
+        currently works for -
+        create new table       (     [[[]]])
+        create new table(        [[[[[]]]]])
+        create new table([])
+
 DML:
     INSERTION :
 

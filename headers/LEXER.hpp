@@ -57,6 +57,8 @@ private:
 
         else if(buf == "(")  t.tokenType = TOKEN_SET::TOKEN_LEFT_PARENTHESES;
         else if(buf == ")")  t.tokenType = TOKEN_SET::TOKEN_RIGHT_PARENTHESES;
+        else if(buf == "[")  t.tokenType = TOKEN_SET::TOKEN_LEFTSQBRACKET;
+        else if(buf == "]")  t.tokenType = TOKEN_SET::TOKEN_RIGHTSQBRACKET;
         else if(buf == "\"")  t.tokenType = TOKEN_SET::TOKEN_DBLQUOTES;
 
         else t.tokenType = TOKEN_SET::TOKEN_STRING; //regular string
@@ -72,29 +74,36 @@ private:
         // start tokenization, assuming token delimiter is ws, and query delimiter is NULL_CHAR
         while(current != NULL_CHAR){
             if(current == ' '){
-                assignToken(tokenBuffer, stringBuffer);
-                tokenList.push_back(tokenBuffer);
-                stringBuffer.clear();
+                if(!stringBuffer.empty()){
+                    assignToken(tokenBuffer, stringBuffer);
+                    tokenList.push_back(tokenBuffer);
+                    stringBuffer.clear();
+                }
+
+                skipLeadingWhitespaces();
             }
             else if(current == '('){
-                assignToken(tokenBuffer, stringBuffer);
-                tokenList.push_back(tokenBuffer);
+                if(!stringBuffer.empty()){
+                    assignToken(tokenBuffer, stringBuffer);
+                    tokenList.push_back(tokenBuffer);
+                }
                 assignToken(tokenBuffer, "(");
                 tokenList.push_back(tokenBuffer);
                 stringBuffer.clear();
+
+                current = advance();
             }
-            else if(current == '['){
-                assignToken(tokenBuffer, stringBuffer);
-                tokenList.push_back(tokenBuffer);
-                assignToken(tokenBuffer, "[");
-                tokenList.push_back(tokenBuffer);
-                stringBuffer.clear();
-            }
+            // else if(current == '['){
+            //     assignToken(tokenBuffer, stringBuffer);
+            //     tokenList.push_back(tokenBuffer);
+            //     assignToken(tokenBuffer, "[");
+            //     tokenList.push_back(tokenBuffer);
+            //     stringBuffer.clear();
+            // }
             else{
                 stringBuffer.push_back(current);
+                current = advance();
             }
-
-            current = advance();
         }
         //last token lexing, before encountering the null char :-
         assignToken(tokenBuffer, stringBuffer);
