@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cctype>
+#include <cmath>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -21,6 +22,8 @@ private:
     std::string inputCpy;
     char current;
 
+    std::vector<char> specialDelimiterList = {'(', ')', '[', ']', ','};
+
     std::vector<TOKEN> tokenList;
 
     void initialize(const std::string& input){
@@ -30,13 +33,6 @@ private:
         current = inputCpy[cursor];
     }
 
-    void skipLeadingWhitespaces(){
-        // skip leading whitespaces
-        while((current == ' ' || current == '\t') && current != NULL_CHAR){
-            current = advance();
-        }
-    }
-
     char advance(){
         if(cursor >= length-1){
             return NULL_CHAR;
@@ -44,76 +40,106 @@ private:
         return inputCpy[++cursor];
     }
 
-    void assignToken(TOKEN& t, const std::string& buf){
+    void skipLeadingWhitespaces(){
+        // skip leading whitespaces
+        while((current == ' ' || current == '\t') && current != NULL_CHAR){
+            current = advance();
+        }
+    }
+
+    bool isSpecialDelimiterr(){
+        for(auto it:specialDelimiterList){
+            if(current == it) return true;
+        }
+        return false;
+    }
+
+    void assignToken(TOKEN& t, const std::string& buf, bool isDigit){
         t.value = buf;
 
         if(buf == "create" || buf == "CREATE")          t.tokenType = TOKEN_SET::TOKEN_CREATE;
         else if(buf == "new" || buf == "NEW")           t.tokenType = TOKEN_SET::TOKEN_NEW;
         else if(buf == "db" || buf == "DB")             t.tokenType = TOKEN_SET::TOKEN_DB;
         else if(buf == "table" || buf == "TABLE")       t.tokenType = TOKEN_SET::TOKEN_TABLE;
+
         else if(buf == "insert" || buf == "INSERT")     t.tokenType = TOKEN_SET::TOKEN_INSERT;
-        else if(buf == "in" || buf == "IN")         t.tokenType = TOKEN_SET::TOKEN_IN;
+        else if(buf == "in" || buf == "IN")             t.tokenType = TOKEN_SET::TOKEN_IN;
         else if(buf == "values" || buf == "VALUES")     t.tokenType = TOKEN_SET::TOKEN_VALUES;
 
-        else if(buf == "(")  t.tokenType = TOKEN_SET::TOKEN_LEFT_PARENTHESES;
-        else if(buf == ")")  t.tokenType = TOKEN_SET::TOKEN_RIGHT_PARENTHESES;
-        else if(buf == "[")  t.tokenType = TOKEN_SET::TOKEN_LEFTSQBRACKET;
-        else if(buf == "]")  t.tokenType = TOKEN_SET::TOKEN_RIGHTSQBRACKET;
-        else if(buf == "\"")  t.tokenType = TOKEN_SET::TOKEN_DBLQUOTES;
+        else if(buf == "int" || buf == "INT")           t.tokenType = TOKEN_SET::TOKEN_TYPEINT;
+        else if(buf == "varchar" || buf == "VARCHAR")   t.tokenType = TOKEN_SET::TOKEN_TYPEVARCHAR;
 
-        else t.tokenType = TOKEN_SET::TOKEN_STRING; //regular string
+        else if(buf == "(") t.tokenType = TOKEN_SET::TOKEN_LEFT_PARENTHESES;
+        else if(buf == ")") t.tokenType = TOKEN_SET::TOKEN_RIGHT_PARENTHESES;
+        else if(buf == "[") t.tokenType = TOKEN_SET::TOKEN_LEFTSQBRACKET;
+        else if(buf == "]") t.tokenType = TOKEN_SET::TOKEN_RIGHTSQBRACKET;
+        else if(buf == ",") t.tokenType = TOKEN_SET::TOKEN_COMMA;
+
+        else{
+            if(isDigit){
+                t.tokenType = TOKEN_SET::TOKEN_INT_VALUE;       //full integer value
+            }else{
+                t.tokenType = TOKEN_SET::TOKEN_STRING_VALUE;    //regular string
+            }
+        }
+    }
+
+    void delimiterSpecial(TOKEN& t, std::string& buf, bool isDigit){
+        if(!buf.empty()){
+            assignToken(t, buf, isDigit);
+            tokenList.push_back(t);
+        }
+        buf.clear();
+
+        assignToken(t, std::string(1, current), isDigit);
+        tokenList.push_back(t);
     }
 
     void tokenize(const std::string& input){
         // writing own tokenizer from scatch, zero references less gooooooo
         std::string stringBuffer;
         TOKEN tokenBuffer;
+        bool isDigit = true;
 
         skipLeadingWhitespaces();
 
         // start tokenization, assuming token delimiter is ws, and query delimiter is NULL_CHAR
         while(current != NULL_CHAR){
-            if(current == ' '){
+            if(current == ' ' || current == '\t'){
                 if(!stringBuffer.empty()){
-                    assignToken(tokenBuffer, stringBuffer);
+                    assignToken(tokenBuffer, stringBuffer, isDigit);
                     tokenList.push_back(tokenBuffer);
                     stringBuffer.clear();
                 }
 
                 skipLeadingWhitespaces();
+                isDigit = true;
             }
-            else if(current == '('){
-                if(!stringBuffer.empty()){
-                    assignToken(tokenBuffer, stringBuffer);
-                    tokenList.push_back(tokenBuffer);
-                }
-                assignToken(tokenBuffer, "(");
-                tokenList.push_back(tokenBuffer);
-                stringBuffer.clear();
+            else if(isSpecialDelimiterr()){
+                delimiterSpecial(tokenBuffer, stringBuffer, isDigit);
 
                 current = advance();
+                isDigit = true;
             }
-            // else if(current == '['){
-            //     assignToken(tokenBuffer, stringBuffer);
-            //     tokenList.push_back(tokenBuffer);
-            //     assignToken(tokenBuffer, "[");
-            //     tokenList.push_back(tokenBuffer);
-            //     stringBuffer.clear();
-            // }
             else{
+                if(!std::isdigit(current)) isDigit = false;
+
                 stringBuffer.push_back(current);
                 current = advance();
             }
         }
+
         //last token lexing, before encountering the null char :-
-        assignToken(tokenBuffer, stringBuffer);
-        tokenList.push_back(tokenBuffer);
-        stringBuffer.clear();
+        if(!stringBuffer.empty()){
+            assignToken(tokenBuffer, stringBuffer, isDigit);
+            tokenList.push_back(tokenBuffer);
+            stringBuffer.clear();
+        }
     }
 
     void displayAllTokens(){
         for(size_t i=0; i<tokenList.size(); i++){
-            std::cout<<i<<") "<<tokenList[i].value<<std::endl;
+            std::cout<<i<<") "<<tokenList[i].value<<", "<<static_cast<int>(tokenList[i].tokenType)<<std::endl;
         }
     }
 

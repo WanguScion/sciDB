@@ -1,17 +1,20 @@
-<identifier> : only alphabets, numbers, and _
+STRING_VALUE    : all string chars
+INT_VALUE       : all digits
 
 DDL:
     CREATE :- (UC/lc)
 
         create new db <db_name>
 
-        create new table <table_name>
+        create new table <table_name> (col1 datatype constraint1, ..... )
 
 
         currently works for -
         create new table       (     [[[]]])
         create new table(        [[[[[]]]]])
         create new table([])
+        create new table Students(	roll_no INT, name VARCHAR(50)		)
+
 
 DML:
     INSERTION :
