@@ -1,3 +1,7 @@
+#pragma once
+
+#include<string>
+
 enum class TOKEN_SET{
     TOKEN_CREATE,
     TOKEN_NEW,
@@ -8,8 +12,10 @@ enum class TOKEN_SET{
     TOKEN_IN,
     TOKEN_VALUES,
 
-    TOKEN_TYPEINT,
-    TOKEN_TYPEVARCHAR,
+    TOKEN_TYPE_INT,
+    TOKEN_TYPE_VARCHAR,
+
+    TOKEN_CONSTRAINT_PKEY,
 
     TOKEN_STRING_VALUE,
     TOKEN_INT_VALUE,
@@ -19,4 +25,9 @@ enum class TOKEN_SET{
     TOKEN_LEFTSQBRACKET,
     TOKEN_RIGHTSQBRACKET,
     TOKEN_COMMA
+};
+
+struct TOKEN{
+    TOKEN_SET tokenType;
+    std::string value;
 };

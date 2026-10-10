@@ -10,19 +10,13 @@
 
 #define NULL_CHAR '\0'
 
-struct TOKEN{
-    TOKEN_SET tokenType;
-    std::string value;
-};
-
+//lexing - making tokens from the input string
 class Lexer{
 private:
     int cursor;
     int length;
     std::string inputCpy;
     char current;
-
-    std::vector<char> specialDelimiterList = {'(', ')', '[', ']', ','};
 
     std::vector<TOKEN> tokenList;
 
@@ -47,13 +41,6 @@ private:
         }
     }
 
-    bool isSpecialDelimiterr(){
-        for(auto it:specialDelimiterList){
-            if(current == it) return true;
-        }
-        return false;
-    }
-
     void assignToken(TOKEN& t, const std::string& buf, bool isDigit){
         t.value = buf;
 
@@ -66,8 +53,8 @@ private:
         else if(buf == "in" || buf == "IN")             t.tokenType = TOKEN_SET::TOKEN_IN;
         else if(buf == "values" || buf == "VALUES")     t.tokenType = TOKEN_SET::TOKEN_VALUES;
 
-        else if(buf == "int" || buf == "INT")           t.tokenType = TOKEN_SET::TOKEN_TYPEINT;
-        else if(buf == "varchar" || buf == "VARCHAR")   t.tokenType = TOKEN_SET::TOKEN_TYPEVARCHAR;
+        else if(buf == "int" || buf == "INT")           t.tokenType = TOKEN_SET::TOKEN_TYPE_INT;
+        else if(buf == "varchar" || buf == "VARCHAR")   t.tokenType = TOKEN_SET::TOKEN_TYPE_VARCHAR;
 
         else if(buf == "(") t.tokenType = TOKEN_SET::TOKEN_LEFT_PARENTHESES;
         else if(buf == ")") t.tokenType = TOKEN_SET::TOKEN_RIGHT_PARENTHESES;
@@ -82,6 +69,14 @@ private:
                 t.tokenType = TOKEN_SET::TOKEN_STRING_VALUE;    //regular string
             }
         }
+    }
+
+    void delimiterWS(TOKEN& t, std::string& buf, bool isDigit){
+        if(!buf.empty()){
+            assignToken(t, buf, isDigit);
+            tokenList.push_back(t);
+        }
+        buf.clear();
     }
 
     void delimiterSpecial(TOKEN& t, std::string& buf, bool isDigit){
@@ -101,45 +96,42 @@ private:
         TOKEN tokenBuffer;
         bool isDigit = true;
 
-        skipLeadingWhitespaces();
-
         // start tokenization, assuming token delimiter is ws, and query delimiter is NULL_CHAR
+        skipLeadingWhitespaces();
         while(current != NULL_CHAR){
-            if(current == ' ' || current == '\t'){
-                if(!stringBuffer.empty()){
-                    assignToken(tokenBuffer, stringBuffer, isDigit);
-                    tokenList.push_back(tokenBuffer);
-                    stringBuffer.clear();
-                }
+            switch(current){
+                case ' '    :
+                case '\t'   :
+                    delimiterWS(tokenBuffer, stringBuffer, isDigit);
+                    skipLeadingWhitespaces();
+                    isDigit = true;
+                    break;
 
-                skipLeadingWhitespaces();
-                isDigit = true;
-            }
-            else if(isSpecialDelimiterr()){
-                delimiterSpecial(tokenBuffer, stringBuffer, isDigit);
+                case '('    :
+                case ')'    :
+                case '['    :
+                case ']'    :
+                case ','    :
+                    delimiterSpecial(tokenBuffer, stringBuffer, isDigit);
+                    current = advance();
+                    isDigit = true;
+                    break;
 
-                current = advance();
-                isDigit = true;
-            }
-            else{
-                if(!std::isdigit(current)) isDigit = false;
-
-                stringBuffer.push_back(current);
-                current = advance();
+                default:
+                    if(!std::isdigit(current)) isDigit = false;
+                    stringBuffer.push_back(current);
+                    current = advance();
             }
         }
 
         //last token lexing, before encountering the null char :-
-        if(!stringBuffer.empty()){
-            assignToken(tokenBuffer, stringBuffer, isDigit);
-            tokenList.push_back(tokenBuffer);
-            stringBuffer.clear();
-        }
+        delimiterWS(tokenBuffer, stringBuffer, isDigit);
     }
 
     void displayAllTokens(){
         for(size_t i=0; i<tokenList.size(); i++){
-            std::cout<<i<<") "<<tokenList[i].value<<", "<<static_cast<int>(tokenList[i].tokenType)<<std::endl;
+            std::cout<<i<<") "<<tokenList[i].value;
+            std::cout<<std::endl;
         }
     }
 
@@ -153,7 +145,11 @@ public:
     void handle(const std::string& input){
         initialize(input);
         tokenize(input);
-        displayAllTokens();
-        dropList();
+        // displayAllTokens();
+        // dropList();
+    }
+
+    std::vector<TOKEN>& getTokenList(){
+        return tokenList;
     }
 };
