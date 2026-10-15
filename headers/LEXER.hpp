@@ -44,17 +44,18 @@ private:
     void assignToken(TOKEN& t, const std::string& buf, bool isDigit){
         t.value = buf;
 
-        if(buf == "create" || buf == "CREATE")          t.tokenType = TOKEN_SET::TOKEN_CREATE;
-        else if(buf == "new" || buf == "NEW")           t.tokenType = TOKEN_SET::TOKEN_NEW;
-        else if(buf == "db" || buf == "DB")             t.tokenType = TOKEN_SET::TOKEN_DB;
-        else if(buf == "table" || buf == "TABLE")       t.tokenType = TOKEN_SET::TOKEN_TABLE;
+        if(buf == "create" || buf == "CREATE")              t.tokenType = TOKEN_SET::TOKEN_CREATE;
+        else if(buf == "db" || buf == "DB")                 t.tokenType = TOKEN_SET::TOKEN_DB;
+        else if(buf == "table" || buf == "TABLE")           t.tokenType = TOKEN_SET::TOKEN_TABLE;
 
-        else if(buf == "insert" || buf == "INSERT")     t.tokenType = TOKEN_SET::TOKEN_INSERT;
-        else if(buf == "in" || buf == "IN")             t.tokenType = TOKEN_SET::TOKEN_IN;
-        else if(buf == "values" || buf == "VALUES")     t.tokenType = TOKEN_SET::TOKEN_VALUES;
+        else if(buf == "insert" || buf == "INSERT")         t.tokenType = TOKEN_SET::TOKEN_INSERT;
+        else if(buf == "in" || buf == "IN")                 t.tokenType = TOKEN_SET::TOKEN_IN;
+        else if(buf == "values" || buf == "VALUES")         t.tokenType = TOKEN_SET::TOKEN_VALUES;
 
-        else if(buf == "int" || buf == "INT")           t.tokenType = TOKEN_SET::TOKEN_TYPE_INT;
-        else if(buf == "varchar" || buf == "VARCHAR")   t.tokenType = TOKEN_SET::TOKEN_TYPE_VARCHAR;
+        else if(buf == "int" || buf == "INT")               t.tokenType = TOKEN_SET::TOKEN_TYPE_INT;
+        else if(buf == "varchar" || buf == "VARCHAR")       t.tokenType = TOKEN_SET::TOKEN_TYPE_VARCHAR;
+
+        else if(buf == "primarykey" || buf == "PRIMARYKEY") t.tokenType = TOKEN_SET::TOKEN_CONSTRAINT_PRIMARYKEY;
 
         else if(buf == "(") t.tokenType = TOKEN_SET::TOKEN_LEFT_PARENTHESES;
         else if(buf == ")") t.tokenType = TOKEN_SET::TOKEN_RIGHT_PARENTHESES;
@@ -128,16 +129,12 @@ private:
         delimiterWS(tokenBuffer, stringBuffer, isDigit);
     }
 
-    void displayAllTokens(){
-        for(size_t i=0; i<tokenList.size(); i++){
-            std::cout<<i<<") "<<tokenList[i].value;
-            std::cout<<std::endl;
-        }
-    }
-
-    void dropList(){
-        tokenList.clear();
-    }
+//     void displayAllTokens(){
+//         for(size_t i=1; i<tokenList.size(); i++){
+//             std::cout<<i<<") "<<tokenList[i].value;
+//             std::cout<<std::endl;
+//         }
+//     }
 
 public:
     Lexer() {}
@@ -146,10 +143,13 @@ public:
         initialize(input);
         tokenize(input);
         // displayAllTokens();
-        // dropList();
     }
 
     std::vector<TOKEN>& getTokenList(){
         return tokenList;
+    }
+
+    void dropTokenList(){
+//         tokenList.clear();
     }
 };

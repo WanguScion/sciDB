@@ -1,10 +1,9 @@
 #pragma once
 
-#include<string>
+#include <string>
 
 enum class TOKEN_SET{
     TOKEN_CREATE,
-    TOKEN_NEW,
     TOKEN_DB,
     TOKEN_TABLE,
 
@@ -15,7 +14,8 @@ enum class TOKEN_SET{
     TOKEN_TYPE_INT,
     TOKEN_TYPE_VARCHAR,
 
-    TOKEN_CONSTRAINT_PKEY,
+    TOKEN_CONSTRAINT_PRIMARYKEY,
+    TOKEN_CONSTRAINT_UNIQUE,
 
     TOKEN_STRING_VALUE,
     TOKEN_INT_VALUE,

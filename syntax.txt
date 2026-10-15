@@ -4,9 +4,9 @@ INT_VALUE       : all digits
 DDL:
     CREATE :- (UC/lc)
 
-        create new db <db_name>
+        create db <db_name>
 
-        create new table <table_name> (col1 datatype constraint1, ..... )
+        create table <table_name> (col1 datatype constraint1, ..... )
 
 
         currently works for -
